@@ -1,0 +1,8 @@
+{
+  "api_url": "https://rumble.com/-livestream-api/get-data?key=PASTE_YOUR_KEY_HERE",
+  "poll_live_seconds": 10,
+  "poll_idle_seconds": 30,
+  "request_timeout_seconds": 20,
+  "max_backoff_seconds": 300,
+  "keep_raw_responses": true
+}

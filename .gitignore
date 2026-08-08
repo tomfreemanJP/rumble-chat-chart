@@ -1,0 +1,13 @@
+# the API key lives here
+config.json
+
+# captured data, logs, raw archives, exports
+data/
+
+# build output
+build/
+dist/
+*.spec
+
+__pycache__/
+*.pyc
