@@ -1432,7 +1432,7 @@ def cmd_configure(args: argparse.Namespace) -> int:
     if not url.lower().startswith("http"):
         message = "That does not look like a URL. Nothing was saved."
         print(message)
-        _gui_notice("Rumble Chat Chart",message, error=True, enabled=not args.console)
+        _gui_notice("Rumble Chat Chart", message, error=True, enabled=not args.console)
         return 1
 
     path = save_api_url(url)
@@ -1440,7 +1440,7 @@ def cmd_configure(args: argparse.Namespace) -> int:
 
     ok, detail = check_api_url(url, int(load_config()["request_timeout_seconds"]))
     print(detail)
-    _gui_notice("RumbleLog", detail, error=not ok, enabled=not args.console)
+    _gui_notice("Rumble Chat Chart", detail, error=not ok, enabled=not args.console)
     return 0 if ok else 1
 
 

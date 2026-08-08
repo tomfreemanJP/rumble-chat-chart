@@ -1,4 +1,4 @@
-# rumblelog
+# rumble-chat-chart
 
 Unattended capture of **who said what**, **which donations (rants) came in**, and **who
 subscribed** during your Rumble streams — plus **leaderboards** ranking your viewers by
@@ -12,10 +12,14 @@ steps.
 
 Python 3.8+, standard library only. Nothing to `pip install` to run it.
 
+> The Python module is `rumble_chat_chart.py` with underscores, because a hyphenated name
+> is not importable. Everything user-facing — the repo, the executables, the installer —
+> uses `rumble-chat-chart`.
+
 ## Setup from source
 
 ```bash
-python rumblelog.py configure
+python rumble_chat_chart.py configure
 ```
 
 Opens a dialog (or prompts in the terminal with `--console`) for the Live Stream API URL
@@ -23,7 +27,7 @@ from Rumble → Account Settings → API, saves it, and immediately tests it so 
 straight away whether it works.
 
 ```bash
-python rumblelog.py verify
+python rumble_chat_chart.py verify
 ```
 
 Fetches once and prints the payload's real structure — top-level keys, livestreams seen,
@@ -39,10 +43,10 @@ and the first chat message object verbatim.
 powershell -ExecutionPolicy Bypass -File install-service.ps1
 ```
 
-Registers a scheduled task called `RumbleLog`: an **AtLogon** trigger plus a **5-minute
-watchdog** trigger with `MultipleInstances=IgnoreNew`, so the watchdog does nothing while
-the poller is alive and restarts it if it died. Runs as your own user via `pythonw.exe` —
-no console window, no admin rights. Remove it with `uninstall-service.ps1`.
+Registers a scheduled task called `RumbleChatChart`: an **AtLogon** trigger plus a
+**5-minute watchdog** trigger with `MultipleInstances=IgnoreNew`, so the watchdog does
+nothing while the poller is alive and restarts it if it died. Runs as your own user via
+`pythonw.exe` — no console window, no admin rights. Remove it with `uninstall-service.ps1`.
 
 ## What it does while running
 
@@ -55,13 +59,13 @@ no console window, no admin rights. Remove it with `uninstall-service.ps1`.
 - Closes the stream row when the livestream disappears from the payload.
 
 ```bash
-python rumblelog.py status
+python rumble_chat_chart.py status
 ```
 
 ## Leaderboards
 
 ```bash
-python rumblelog.py leaderboard
+python rumble_chat_chart.py leaderboard
 ```
 
 Four rankings, all at once by default:
@@ -76,11 +80,11 @@ Four rankings, all at once by default:
 Scope any of them to a calendar window:
 
 ```bash
-python rumblelog.py leaderboard --period week
+python rumble_chat_chart.py leaderboard --period week
 ```
 
 ```bash
-python rumblelog.py leaderboard --board donations --period month
+python rumble_chat_chart.py leaderboard --board donations --period month
 ```
 
 `--period` takes `day`, `week` (Monday-start), `month`, `year` or `all`. It means the
@@ -90,7 +94,7 @@ single broadcast, `--top N` for longer lists, and `--format csv|json` to pipe it
 somewhere:
 
 ```bash
-python rumblelog.py leaderboard --period month --format csv > august.csv
+python rumble_chat_chart.py leaderboard --period month --format csv > august.csv
 ```
 
 Two things worth knowing about how these are scored:
@@ -110,14 +114,14 @@ Two things worth knowing about how these are scored:
 `queries.sql` holds ready-to-paste SQL. Open the database with any SQLite client:
 
 ```bash
-sqlite3 data/rumblelog.db
+sqlite3 data/rumble-chat-chart.db
 ```
 
 Or dump a stream to CSV (`messages.csv`, `rants.csv`, `events.csv` under
 `data/export/<stream_id>/`):
 
 ```bash
-python rumblelog.py export --stream latest
+python rumble_chat_chart.py export --stream latest
 ```
 
 ### Tables
@@ -133,9 +137,9 @@ python rumblelog.py export --stream latest
 
 ## Building a click-to-install installer
 
-The end result is `rumblelog-setup-1.0.0.exe`: a double-click installer that bundles
-Python, asks for the API key in the wizard, registers the background task, and adds Start
-Menu shortcuts. The person installing needs nothing preinstalled.
+The end result is `rumble-chat-chart-setup-1.0.0.exe`: a double-click installer that
+bundles Python, asks for the API key in the wizard, registers the background task, and adds
+Start Menu shortcuts. The person installing needs nothing preinstalled.
 
 **Build prerequisites** (on your machine only):
 
@@ -157,15 +161,15 @@ That freezes two executables and compiles the installer into `dist\`:
 
 | | |
 |---|---|
-| `rumblelog.exe` | console build — the full CLI |
-| `rumblelogw.exe` | windowed build — the service, and the dialogs |
+| `rumble-chat-chart.exe` | console build — the full CLI |
+| `rumble-chat-chartw.exe` | windowed build — the service, and the dialogs |
 
 Two builds because a console app run at logon flashes a terminal window, while a windowed
 build has no stdout for CLI output. The scheduled task and the "Set API key" shortcut use
 the windowed one; the leaderboard and status shortcuts use the console one.
 
-Installed, it lands in `%LOCALAPPDATA%\Programs\RumbleLog` with data in
-`%LOCALAPPDATA%\RumbleLog` — a per-user install, so there is no UAC prompt and the
+Installed, it lands in `%LOCALAPPDATA%\Programs\Rumble Chat Chart` with data in
+`%LOCALAPPDATA%\RumbleChatChart` — a per-user install, so there is no UAC prompt and the
 scheduled task runs as whoever owns the API key.
 
 ### Distribution notes
@@ -191,10 +195,10 @@ Read these before sending the installer to anyone.
 ## If a field is mapped wrong
 
 Every raw response is archived, so a bad guess is recoverable. Fix the mapping in
-`rumblelog.py`, then rebuild the derived tables from disk:
+`rumble_chat_chart.py`, then rebuild the derived tables from disk:
 
 ```bash
-python rumblelog.py reparse --rebuild
+python rumble_chat_chart.py reparse --rebuild
 ```
 
 This discards `messages`, `rants` and `events` and re-derives them from
@@ -219,8 +223,8 @@ just replays and fills in anything missing, which is safe to run any time. Keep
 
 | symptom | check |
 |---|---|
-| `status` shows no polls | `Get-ScheduledTask RumbleLog` — registered and running? |
-| every poll fails | `rumblelog verify` — usually a stale or missing `api_url` |
+| `status` shows no polls | `Get-ScheduledTask RumbleChatChart` — registered and running? |
+| every poll fails | `verify` — usually a stale or missing `api_url` |
 | stream live but nothing captured | run `verify` during the stream; the chat block may be named differently |
 | gifts leaderboard always empty | Rumble may name the gifter field something unexpected — see `gifted_by()` |
 | rant amounts look 100x off | a bare number was assumed to be cents; check `verify` and fix `rant_cents()` |
@@ -244,13 +248,20 @@ uninstall-task  remove it
 ## Files
 
 ```
-rumblelog.py            the program: capture, leaderboards, task registration
-rumblelogw.py           windowless entry point, frozen into rumblelogw.exe
-config.example.json     copy to config.json, or just run `configure`
-build.ps1               freeze the exes and build the installer
-installer/rumblelog.iss Inno Setup script
-install-service.ps1     register the task when running from source
-uninstall-service.ps1   remove it
-queries.sql             ready-made SQL
-data/                   database, logs, raw archive, exports (gitignored)
+rumble_chat_chart.py       the program: capture, leaderboards, task registration
+rumble_chat_chartw.py      windowless entry point, frozen into rumble-chat-chartw.exe
+config.example.json        copy to config.json, or just run `configure`
+build.ps1                  freeze the exes and build the installer
+installer/                 Inno Setup script
+install-service.ps1        register the task when running from source
+uninstall-service.ps1      remove it
+queries.sql                ready-made SQL
+data/                      database, logs, raw archive, exports (gitignored)
 ```
+
+## Environment variables
+
+| | |
+|---|---|
+| `RUMBLE_CHAT_CHART_HOME` | override where config and data live |
+| `RUMBLE_CHAT_CHART_API_URL` | supply the API URL instead of `config.json` |
